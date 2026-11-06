@@ -5,7 +5,8 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import HimitAPI
@@ -18,36 +19,56 @@ PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.SWITCH, Platform.
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-"""Set up Hi-Mit II from a config entry."""
-session = async_get_clientsession(hass)
-api         = HimitAPI(session)
-coordinator = HimitCoordinator(hass, api, entry)
+    """Set up Hi-Mit II from a config entry."""
+    session = async_get_clientsession(hass)
+    api = HimitAPI(session)
+    coordinator = HimitCoordinator(hass, api, entry)
 
-# Initial fetch — raises ConfigEntryNotReady on failure
-await coordinator.async_config_entry_first_refresh()
+    # Initial fetch — raises ConfigEntryNotReady on failure
+    await coordinator.async_config_entry_first_refresh()
 
-hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
 
-await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-# Listen for option updates
-entry.async_on_unload(entry.add_update_listener(_async_update_listener))
+    _async_enable_new_diagnostics(hass, entry)
 
-return True
+    # Listen for option updates
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
+
+    return True
+
+
+@callback
+def _async_enable_new_diagnostics(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Enable additions previously disabled by this integration's old defaults."""
+    from .binary_sensor import EXPERIMENTAL_BINARY_SENSOR_DESCRIPTIONS
+    from .sensor import RAW_SENSOR_DESCRIPTIONS
+
+    keys = {description.key for description in (
+        *EXPERIMENTAL_BINARY_SENSOR_DESCRIPTIONS, *RAW_SENSOR_DESCRIPTIONS
+    )}
+    registry = er.async_get(hass)
+    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if (
+            entity.platform == DOMAIN
+            and entity.disabled_by is er.RegistryEntryDisabler.INTEGRATION
+            and any(entity.unique_id.endswith(f"_{key}") for key in keys)
+        ):
+            registry.async_update_entity(entity.entity_id, disabled_by=None)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-"""Unload a config entry."""
-unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-if unload_ok:
-hass.data[DOMAIN].pop(entry.entry_id, None)
-return unload_ok
+    """Unload a config entry."""
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unload_ok:
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+    return unload_ok
 
 
 async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Handle options updates."""
     """Handle options updates (ignore token-only updates of entry.data)."""
     coordinator = hass.data.get(DOMAIN, {}).get(entry.entry_id)
     if coordinator is not None and dict(entry.options) == coordinator.loaded_options:
         return
-await hass.config_entries.async_reload(entry.entry_id)
+    await hass.config_entries.async_reload(entry.entry_id)

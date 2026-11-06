@@ -3,34 +3,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 
-from .const import (
-    CONF_ACCESS_TOKEN,
-    CONF_REFRESH_TOKEN,
-    DOMAIN,
-)
-
-# Keys that contain sensitive data and must be redacted
-TO_REDACT_CONFIG = {
-    CONF_USERNAME,
-    CONF_PASSWORD,
-    CONF_ACCESS_TOKEN,
-    CONF_REFRESH_TOKEN,
-}
-
-TO_REDACT_DEVICE = {
-    "wifiId",
-    "wifiMac",
-    "mac",
-    "macAddress",
-    "ip",
-    "ssid",
-    "customerId",
-}
+from .const import DOMAIN
+from .privacy import redact_diagnostics
 
 
 async def async_get_config_entry_diagnostics(
@@ -50,27 +27,22 @@ async def async_get_config_entry_diagnostics(
 
     # Discovered devices (redact sensitive fields)
     devices = [
-        async_redact_data(d, TO_REDACT_DEVICE)
+        redact_diagnostics(d)
         for d in coordinator.atw_devices
     ]
 
     # Raw discovery response (redact sensitive fields)
-    raw_discovery = async_redact_data(
-        coordinator._raw_device_discovery, TO_REDACT_DEVICE
-    )
+    raw_discovery = redact_diagnostics(coordinator._raw_device_discovery)
 
     # Current coordinator data (device states)
     device_states = {}
     if coordinator.data:
-        for device_id, state in coordinator.data.items():
-            redacted = dict(state)
-            # Redact internal wifi ID
-            redacted.pop("_wifiId", None)
-            device_states[device_id] = redacted
+        for index, state in enumerate(coordinator.data.values(), start=1):
+            device_states[f"device_{index}"] = redact_diagnostics(state)
 
     return {
-        "config_entry": async_redact_data(dict(entry.data), TO_REDACT_CONFIG),
-        "options": dict(entry.options),
+        "config_entry": redact_diagnostics(dict(entry.data)),
+        "options": redact_diagnostics(dict(entry.options)),
         "token_lifecycle": token_info,
         "discovered_devices": devices,
         "raw_device_discovery": raw_discovery,
