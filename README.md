@@ -80,6 +80,8 @@ diagnostics. HACS metadata and documentation URLs point to this fork.
 
 **Setpoint min/max limits are read live from the device** (the pump reports its own allowed ranges per heating/cooling mode).
 
+Exception in this fork: Circuit 1 has a fixed minimum setpoint of **20°C**.
+
 ---
 
 ## Installation
