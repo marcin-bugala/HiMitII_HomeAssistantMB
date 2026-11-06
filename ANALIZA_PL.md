@@ -1,7 +1,7 @@
 # Hi-Mit II MB — zakres rozszerzenia
 
 Baza: `marcin-bugala/HiMitII_HomeAssistantMB`, commit
-`dbe2f6e6fbd8e9833d7fca7b5f5cfecfc905389e`. Wersja lokalnego rozszerzenia: 1.2.0.
+`dbe2f6e6fbd8e9833d7fca7b5f5cfecfc905389e`. Wersja lokalnego rozszerzenia: 1.2.1.
 Przeanalizowano oryginalny plik diagnostyczny przekazany w poprzednim czacie.
 W testach pozostawiono wyłącznie anonimową telemetrię; nie ma danych konta,
 identyfikatorów urządzenia ani czasu zrzutu.
@@ -31,8 +31,10 @@ informacji o rzeczywistej pracy sprężarki.
 
 ## Nowe encje
 
-Wszystkie mają kategorię diagnostyczną. Jedynie surowy kod alarmu jest domyślnie
-włączony. Każda dodana encja wskazuje pole źródłowe i poziom pewności w atrybutach
+Wszystkie mają kategorię diagnostyczną i są domyślnie włączone do obserwacji.
+Aktualizacja włącza również nowe encje wyłączone przez poprzednie ustawienia
+integracji; ręczne wyłączenia użytkownika są zachowane. Status eksperymentalny
+mapowań pozostaje bez zmian. Każda dodana encja wskazuje pole źródłowe i poziom pewności w atrybutach
 `source_field` oraz `mapping_confidence`.
 
 | Pole API | Interpretacja robocza | Udostępnienie |
@@ -101,7 +103,7 @@ Windows. Nie jest to test uruchomienia pełnego HA OS ani test na wersji
 1. Wykonać kopię aktualnego katalogu `custom_components/himit`.
 2. Zastąpić go katalogiem z przygotowanej paczki i uruchomić ponownie HA.
    Nie usuwać konfiguracji integracji ani jej encji.
-3. Włączyć wybrane encje diagnostyczne w rejestrze encji HA.
+3. Sprawdzić dostępność 30 nowych encji diagnostycznych po aktualizacji.
 4. Porównać obserwacje z kontrolerem i aplikacją podczas naturalnego postoju,
    CO, CWU oraz odszraniania. Zapisać czas, stan na kontrolerze i zrzut diagnostyki.
 5. Do potwierdzenia mapowania wymagać zgodności przed, podczas i po zdarzeniu,

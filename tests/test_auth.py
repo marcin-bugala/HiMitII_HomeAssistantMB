@@ -169,8 +169,9 @@ def test_setup_unload_and_listener_registration():
         hass.config_entries.async_unload_platforms = AsyncMock(return_value=True)
         entry.add_update_listener = Mock(return_value="listener-unsubscribe")
         entry.async_on_unload = Mock()
-        with patch("custom_components.himit.async_get_clientsession", return_value=object()), patch("custom_components.himit.HimitAPI"), patch("custom_components.himit.HimitCoordinator", return_value=coord):
+        with patch("custom_components.himit.async_get_clientsession", return_value=object()), patch("custom_components.himit.HimitAPI"), patch("custom_components.himit.HimitCoordinator", return_value=coord), patch("custom_components.himit._async_enable_new_diagnostics") as enable:
             assert await async_setup_entry(hass, entry)
+        enable.assert_called_once_with(hass, entry)
         coord.async_config_entry_first_refresh.assert_awaited_once()
         entry.add_update_listener.assert_called_once_with(_async_update_listener)
         entry.async_on_unload.assert_called_once_with("listener-unsubscribe")

@@ -5,7 +5,8 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import HimitAPI
@@ -30,10 +31,31 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
+    _async_enable_new_diagnostics(hass, entry)
+
     # Listen for option updates
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
 
     return True
+
+
+@callback
+def _async_enable_new_diagnostics(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Enable additions previously disabled by this integration's old defaults."""
+    from .binary_sensor import EXPERIMENTAL_BINARY_SENSOR_DESCRIPTIONS
+    from .sensor import RAW_SENSOR_DESCRIPTIONS
+
+    keys = {description.key for description in (
+        *EXPERIMENTAL_BINARY_SENSOR_DESCRIPTIONS, *RAW_SENSOR_DESCRIPTIONS
+    )}
+    registry = er.async_get(hass)
+    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if (
+            entity.platform == DOMAIN
+            and entity.disabled_by is er.RegistryEntryDisabler.INTEGRATION
+            and any(entity.unique_id.endswith(f"_{key}") for key in keys)
+        ):
+            registry.async_update_entity(entity.entity_id, disabled_by=None)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

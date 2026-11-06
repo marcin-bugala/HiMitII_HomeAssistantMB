@@ -131,15 +131,15 @@ RAW_SENSOR_DESCRIPTIONS = tuple(
         field=field,
         raw=True,
         entity_category=EntityCategory.DIAGNOSTIC,
-        entity_registry_enabled_default=enabled,
+        entity_registry_enabled_default=True,
         icon="mdi:code-braces",
     )
-    for key, name, field, enabled in (
-        ("alarm_code_raw", "Alarm code (raw)", "alarmCode", True),
-        ("run_mode_raw", "Actual run mode (raw)", "realRunMode", False),
-        ("mode_raw", "Mode (raw)", "mode", False),
+    for key, name, field in (
+        ("alarm_code_raw", "Alarm code (raw)", "alarmCode"),
+        ("run_mode_raw", "Actual run mode (raw)", "realRunMode"),
+        ("mode_raw", "Mode (raw)", "mode"),
         *(
-            (f"telemetry_{field.lower()}_raw", f"{field} (raw experimental)", field, False)
+            (f"telemetry_{field.lower()}_raw", f"{field} (raw experimental)", field)
             for field in (
                 "Twi", "Two", "Twohp", "Pw", "PWM", "Fd", "Q_p",
                 "Power_heating", "Capacity_heating", "Power_DHW", "Capacity_DHW",

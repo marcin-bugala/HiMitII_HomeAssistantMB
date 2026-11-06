@@ -44,7 +44,7 @@ EXPERIMENTAL_BINARY_SENSOR_DESCRIPTIONS = tuple(
         field=field,
         experimental=True,
         entity_category=EntityCategory.DIAGNOSTIC,
-        entity_registry_enabled_default=False,
+        entity_registry_enabled_default=True,
         icon="mdi:flask-outline",
     )
     for key, name, field in (

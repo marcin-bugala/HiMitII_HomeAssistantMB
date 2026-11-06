@@ -60,7 +60,7 @@ def test_snapshot_and_entity_updates(state):
         entity = HimitBinarySensor(coord, "test-device", desc)
         assert entity.is_on is False
         assert entity.available
-        assert not desc.entity_registry_enabled_default
+        assert desc.entity_registry_enabled_default
         assert desc.entity_category is EntityCategory.DIAGNOSTIC
         assert entity.extra_state_attributes["mapping_confidence"] == "experimental"
         coord.data = {"test-device": {desc.field: "1"}}
@@ -138,7 +138,7 @@ def test_setup_creates_unique_read_only_entities_without_api_calls(state):
     asyncio.run(setup_sensor(hass, entry, entities.extend))
     assert len(entities) == 47  # 17 legacy + 30 additions
     assert len({entity.unique_id for entity in entities}) == len(entities)
-    assert sum(desc.entity_registry_enabled_default for desc in RAW_SENSOR_DESCRIPTIONS) == 1
+    assert all(desc.entity_registry_enabled_default for desc in RAW_SENSOR_DESCRIPTIONS)
     for entity in entities:
         assert not hasattr(entity, "async_turn_on")
         assert not hasattr(entity, "async_set_native_value")

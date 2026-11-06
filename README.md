@@ -18,8 +18,10 @@ new entities follow the Home Assistant language. User-assigned names are retaine
 ### Read-only telemetry extension (1.2.0)
 
 Adds 30 diagnostic entities using the existing coordinator snapshot, with no
-additional API requests or new control actions. Only **Alarm code (raw)** is
-enabled by default. Enable other entities individually in the entity registry.
+additional API requests or new control actions. All **30 new diagnostic entities**
+are enabled by default for recording and comparison. Updating this fork also enables
+these additions if they were disabled by the integration's previous defaults.
+Entities explicitly disabled by the user remain disabled.
 
 - 14 experimental binary flags: space heating/DHW defrost, four frost protection
   flags, ECO, night, quiet, electric heating, disinfection, Anti Legionella,
@@ -28,7 +30,8 @@ enabled by default. Enable other entities individually in the entity registry.
   (`Twi`, `Two`, `Twohp`, `Pw`, `PWM`, `Fd`, `Q_p`, `Power_heating`,
   `Capacity_heating`, `Power_DHW`, `Capacity_DHW`, `EH1_Power`, `EH2_Power`).
 
-Each addition exposes `source_field` and `mapping_confidence`. Field presence
+Each addition exposes `source_field` and `mapping_confidence`. Enabled status does
+not change the experimental confidence of the mappings. Field presence
 was confirmed in a device snapshot, but event semantics, scaling and units have
 not been verified. Experimental flags interpret only explicit 0/1 or true/false;
 missing or invalid values make the entity unavailable. Raw sensors preserve codes
