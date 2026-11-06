@@ -2,9 +2,63 @@
 
 A custom Home Assistant integration for the **Hisense Hi-Mit II Air-to-Water heat pump** (ATW), reverse-engineered from the official mobile app APK.
 
+This fork is maintained at [marcin-bugala/HiMitII_HomeAssistantMB](https://github.com/marcin-bugala/HiMitII_HomeAssistantMB).
+The original integration is by [danardelean](https://github.com/danardelean/HiMitII_HomeAssistant).
+Automatic re-login and Polish translations are adapted from
+[elektron81's upstream PR #1](https://github.com/danardelean/HiMitII_HomeAssistant/pull/1)
+(head `6ffa48d5e1f6c8e733ea879eafcc91289b0f9181`).
+The `himit` domain and existing unique IDs are preserved. Install this fork in
+place of the original integration. Registered entity IDs are retained; names for
+new entities follow the Home Assistant language. User-assigned names are retained.
+
 ---
 
 ## Features
+
+### Read-only telemetry extension (1.2.0)
+
+Adds 30 diagnostic entities using the existing coordinator snapshot, with no
+additional API requests or new control actions. Only **Alarm code (raw)** is
+enabled by default. Enable other entities individually in the entity registry.
+
+- 14 experimental binary flags: space heating/DHW defrost, four frost protection
+  flags, ECO, night, quiet, electric heating, disinfection, Anti Legionella,
+  DHW boost and emergency mode.
+- 16 raw sensors: alarm code, actual run mode, mode and 13 telemetry fields
+  (`Twi`, `Two`, `Twohp`, `Pw`, `PWM`, `Fd`, `Q_p`, `Power_heating`,
+  `Capacity_heating`, `Power_DHW`, `Capacity_DHW`, `EH1_Power`, `EH2_Power`).
+
+Each addition exposes `source_field` and `mapping_confidence`. Field presence
+was confirmed in a device snapshot, but event semantics, scaling and units have
+not been verified. Experimental flags interpret only explicit 0/1 or true/false;
+missing or invalid values make the entity unavailable. Raw sensors preserve codes
+and zero values, without units, state classes or inferred labels. A zero could
+be a placeholder. No COP, compressor-running inference or combined defrost signal
+is calculated. Do not use experimental cloud flags as the sole protection signal.
+
+Existing entity keys, unique IDs and controls are preserved. In particular,
+**Heat Pump Running** still reads `A2W_SW_ON` for compatibility; this indicates
+the main enable flag and does **not** establish that the compressor is running.
+Existing switches and number entities remain writable as before.
+
+Diagnostics now redact additional nested identifiers and replace device-state
+dictionary keys with `device_1`, etc. Treat diagnostic files as private and check
+them before sharing: unknown vendor fields may contain additional identifiers.
+
+Offline tests use sanitized telemetry only. Run `python -m pytest -q` with
+Home Assistant installed. These tests do not contact Hisense or control a pump.
+
+### Authentication and translations from PR #1
+
+Token updates do not reload the integration; changed options still do. Rejected
+refresh tokens fall back to stored credentials. A rejected data-access token
+(including HTTP 401/403) triggers one login and one read retry. Connection and
+timeout failures report temporary unavailability. A second authentication rejection
+requires reauthentication. This fork also fixes indentation and duplicated/unreachable
+code introduced while copying the PR into the fork.
+
+Polish and English entity translations cover all platforms and the 30 new
+diagnostics. HACS metadata and documentation URLs point to this fork.
 
 | Platform | Entity | Description |
 |---|---|---|
@@ -33,7 +87,7 @@ A custom Home Assistant integration for the **Hisense Hi-Mit II Air-to-Water hea
 ### HACS (recommended)
 
 1. In HACS → **Integrations** → ⋮ → **Custom repositories**
-2. Add this repository URL, category **Integration**
+2. Add `https://github.com/marcin-bugala/HiMitII_HomeAssistantMB`, category **Integration**
 3. Install **Hi-Mit II**
 4. Restart Home Assistant
 
@@ -41,7 +95,7 @@ A custom Home Assistant integration for the **Hisense Hi-Mit II Air-to-Water hea
 
 ```bash
 # From your HA config directory
-git clone https://github.com/YOUR_USERNAME/HiMitII_HomeAssistant.git /tmp/himit
+git clone https://github.com/marcin-bugala/HiMitII_HomeAssistantMB.git /tmp/himit
 cp -r /tmp/himit/custom_components/himit config/custom_components/himit
 ```
 

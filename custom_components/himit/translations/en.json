@@ -37,7 +37,7 @@
       "invalid_auth": "Invalid email or password.",
       "cannot_connect": "Could not connect to the Hi-Mit II cloud. Check your internet connection.",
       "no_homes": "No homes found for this account.",
-      "unknown": "Unexpected error \u2014 check the Home Assistant logs."
+      "unknown": "Unexpected error — check the Home Assistant logs."
     },
     "abort": {
       "already_configured": "This home is already configured.",
@@ -53,6 +53,181 @@
         "data": {
           "scan_interval": "Update interval (seconds)"
         }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "c1_water_actual": {
+        "name": "Circuit 1 Water Temp"
+      },
+      "c2_water_actual": {
+        "name": "Circuit 2 Water Temp"
+      },
+      "dhw_water_actual": {
+        "name": "DHW Water Temp"
+      },
+      "swp_water_actual": {
+        "name": "Pool Water Temp"
+      },
+      "outdoor_temp": {
+        "name": "Outdoor Ambient Temp"
+      },
+      "c1_setpoint": {
+        "name": "Circuit 1 Setpoint"
+      },
+      "c2_setpoint": {
+        "name": "Circuit 2 Setpoint"
+      },
+      "dhw_setpoint": {
+        "name": "DHW Setpoint"
+      },
+      "room_temp_r1": {
+        "name": "Room 1 Temp"
+      },
+      "room_temp_r2": {
+        "name": "Room 2 Temp"
+      },
+      "room_temp_r3": {
+        "name": "Room 3 Temp"
+      },
+      "room_temp_r4": {
+        "name": "Room 4 Temp"
+      },
+      "room_temp_r5": {
+        "name": "Room 5 Temp"
+      },
+      "room_temp_r6": {
+        "name": "Room 6 Temp"
+      },
+      "room_temp_r7": {
+        "name": "Room 7 Temp"
+      },
+      "room_temp_r8": {
+        "name": "Room 8 Temp"
+      },
+      "alarm_code_raw": {
+        "name": "Alarm code (raw)"
+      },
+      "run_mode_raw": {
+        "name": "Actual run mode (raw)"
+      },
+      "mode_raw": {
+        "name": "Mode (raw)"
+      },
+      "telemetry_twi_raw": {
+        "name": "Twi (raw experimental)"
+      },
+      "telemetry_two_raw": {
+        "name": "Two (raw experimental)"
+      },
+      "telemetry_twohp_raw": {
+        "name": "Twohp (raw experimental)"
+      },
+      "telemetry_pw_raw": {
+        "name": "Pw (raw experimental)"
+      },
+      "telemetry_pwm_raw": {
+        "name": "PWM (raw experimental)"
+      },
+      "telemetry_fd_raw": {
+        "name": "Fd (raw experimental)"
+      },
+      "telemetry_q_p_raw": {
+        "name": "Q_p (raw experimental)"
+      },
+      "telemetry_power_heating_raw": {
+        "name": "Power_heating (raw experimental)"
+      },
+      "telemetry_capacity_heating_raw": {
+        "name": "Capacity_heating (raw experimental)"
+      },
+      "telemetry_power_dhw_raw": {
+        "name": "Power_DHW (raw experimental)"
+      },
+      "telemetry_capacity_dhw_raw": {
+        "name": "Capacity_DHW (raw experimental)"
+      },
+      "telemetry_eh1_power_raw": {
+        "name": "EH1_Power (raw experimental)"
+      },
+      "telemetry_eh2_power_raw": {
+        "name": "EH2_Power (raw experimental)"
+      }
+    },
+    "binary_sensor": {
+      "a2w_running": {
+        "name": "Heat Pump Running"
+      },
+      "defrost_spaceheat": {
+        "name": "Space heating defrost (experimental)"
+      },
+      "defrost_dhw": {
+        "name": "DHW defrost (experimental)"
+      },
+      "antifrozen_hp": {
+        "name": "Heat pump frost protection (experimental)"
+      },
+      "antifrozen_wp1_1": {
+        "name": "Water pump frost protection 1 (experimental)"
+      },
+      "antifrozen_wp1_2": {
+        "name": "Water pump frost protection 2 (experimental)"
+      },
+      "antifrozen_eh1": {
+        "name": "Heater frost protection (experimental)"
+      },
+      "eco_mode": {
+        "name": "ECO mode (experimental)"
+      },
+      "night_mode": {
+        "name": "Night mode (experimental)"
+      },
+      "silent_mode": {
+        "name": "Quiet mode (experimental)"
+      },
+      "electric_heating": {
+        "name": "Electric heating flag (experimental)"
+      },
+      "disinfection": {
+        "name": "Disinfection flag (experimental)"
+      },
+      "anti_legionella": {
+        "name": "Anti Legionella flag (experimental)"
+      },
+      "dhw_boost": {
+        "name": "DHW boost flag (experimental)"
+      },
+      "emergency_mode": {
+        "name": "Emergency mode flag (experimental)"
+      }
+    },
+    "switch": {
+      "circuit1": {
+        "name": "Circuit 1 (Heating)"
+      },
+      "circuit2": {
+        "name": "Circuit 2 (Heating)"
+      },
+      "dhw": {
+        "name": "Domestic Hot Water"
+      },
+      "swp": {
+        "name": "Swimming Pool"
+      }
+    },
+    "number": {
+      "c1_setpoint": {
+        "name": "Circuit 1 Setpoint"
+      },
+      "c2_setpoint": {
+        "name": "Circuit 2 Setpoint"
+      },
+      "dhw_setpoint": {
+        "name": "DHW Setpoint"
+      },
+      "swp_setpoint": {
+        "name": "Pool Setpoint"
       }
     }
   }

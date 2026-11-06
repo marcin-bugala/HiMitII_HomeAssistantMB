@@ -3,11 +3,12 @@ from __future__ import annotations
 
 import asyncio
 
-import aiohttp
 import logging
 import time
 from datetime import timedelta
 from typing import Any
+
+import aiohttp
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
@@ -180,6 +181,15 @@ class HimitCoordinator(DataUpdateCoordinator):
 
     # ── Main poll ─────────────────────────────────────────────────────────────
 
+    async def _get_properties(self, device_refs: list[dict]) -> list[dict]:
+        """Normalize HTTP authentication failures for the single retry path."""
+        try:
+            return await self.api.get_device_property(self.access_token, device_refs)
+        except aiohttp.ClientResponseError as exc:
+            if exc.status in (401, 403):
+                raise HimitAuthError(f"HTTP {exc.status}") from exc
+            raise
+
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch latest state from the cloud. Called every scan interval."""
         await self._ensure_token()
@@ -196,30 +206,14 @@ class HimitCoordinator(DataUpdateCoordinator):
         ]
 
         try:
-            props_list = await self.api.get_device_property(
-                self.access_token, device_refs
-            )
-            try:
-                props_list = await self.api.get_device_property(
-                    self.access_token, device_refs
-                )
-            except aiohttp.ClientResponseError as http_exc:
-                # HTTP 401/403 also means the token is invalid
-                if http_exc.status in (401, 403):
-                    raise HimitAuthError(f"HTTP {http_exc.status}") from http_exc
-                raise
+            props_list = await self._get_properties(device_refs)
         except HimitAuthError as exc:
-            raise ConfigEntryAuthFailed(
-                f"Authentication error: {exc}"
-            ) from exc
             # Token revoked early (e.g. after logging in on the phone app) -
             # log in again with stored credentials and retry once.
             _LOGGER.warning("Token rejected (%s) — re-logging in automatically", exc)
             await self._try_relogin()
             try:
-                props_list = await self.api.get_device_property(
-                    self.access_token, device_refs
-                )
+                props_list = await self._get_properties(device_refs)
             except HimitAuthError as exc2:
                 raise ConfigEntryAuthFailed(
                     f"Authentication error after re-login: {exc2}"
