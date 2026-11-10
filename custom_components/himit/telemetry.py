@@ -4,6 +4,12 @@ from __future__ import annotations
 import math
 from typing import Any
 
+# These fields varied during the 6-10 Nov 2026 observation. Period/scale are
+# still hypotheses, so their raw values must not be converted to power/energy.
+PERIODIC_FIELDS = frozenset({
+    "Power_heating", "Capacity_heating", "Power_DHW", "Capacity_DHW",
+})
+
 
 def binary_value(value: Any) -> bool | None:
     """Accept explicit binary values only; never treat the string '0' as true."""

@@ -20,6 +20,7 @@ from custom_components.himit.sensor import (
 from custom_components.himit.coordinator import _parse_property
 from custom_components.himit.diagnostics import async_get_config_entry_diagnostics
 from custom_components.himit.telemetry import binary_value, raw_value
+from custom_components.himit.telemetry import PERIODIC_FIELDS
 
 
 @pytest.fixture
@@ -60,7 +61,7 @@ def test_snapshot_and_entity_updates(state):
         entity = HimitBinarySensor(coord, "test-device", desc)
         assert entity.is_on is False
         assert entity.available
-        assert desc.entity_registry_enabled_default
+        assert not desc.entity_registry_enabled_default
         assert desc.entity_category is EntityCategory.DIAGNOSTIC
         assert entity.extra_state_attributes["mapping_confidence"] == "experimental"
         coord.data = {"test-device": {desc.field: "1"}}
@@ -83,7 +84,12 @@ def test_snapshot_and_entity_updates(state):
         assert desc.native_unit_of_measurement is None
         assert desc.state_class is None
         assert desc.device_class is None
-        assert desc.entity_category is EntityCategory.DIAGNOSTIC
+        assert desc.entity_registry_enabled_default == (desc.field in PERIODIC_FIELDS)
+        assert desc.entity_category == (None if desc.field in PERIODIC_FIELDS else EntityCategory.DIAGNOSTIC)
+        assert entity.extra_state_attributes["suitable_for_realtime_control"] is False
+        assert entity.extra_state_attributes["data_role"] == (
+            "periodic_unverified" if desc.field in PERIODIC_FIELDS else "auxiliary_unverified"
+        )
         coord.data = {"test-device": {desc.field: "A03"}}
         assert entity.native_value == "A03"
         coord.data = {"test-device": {}}
@@ -105,12 +111,18 @@ def test_legacy_entity_identity_and_values(state):
         entity = HimitSensor(coord, "test-device", desc)
         assert entity.unique_id == f"test-device_{desc.key}"
         assert entity.native_value == state[desc.field]
-        assert entity.extra_state_attributes is None
+        if desc.key.startswith("room_temp_r"):
+            assert entity.extra_state_attributes["measurement_verified"] is False
+            assert not desc.entity_registry_enabled_default
+        else:
+            assert entity.extra_state_attributes is None
     legacy = HimitBinarySensor(coord, "test-device", BINARY_SENSOR_DESCRIPTIONS[0])
     assert legacy.unique_id == "test-device_a2w_running"
     assert legacy.entity_description.translation_key == "a2w_running"
     assert legacy.is_on is True
-    assert legacy.extra_state_attributes is None
+    assert legacy.extra_state_attributes["data_role"] == "unit_enabled"
+    assert legacy.extra_state_attributes["compressor_running_verified"] is False
+    assert legacy.entity_description.device_class is None
 
 
 def test_parser_precedence_and_legacy_readings():
@@ -138,7 +150,7 @@ def test_setup_creates_unique_read_only_entities_without_api_calls(state):
     asyncio.run(setup_sensor(hass, entry, entities.extend))
     assert len(entities) == 47  # 17 legacy + 30 additions
     assert len({entity.unique_id for entity in entities}) == len(entities)
-    assert all(desc.entity_registry_enabled_default for desc in RAW_SENSOR_DESCRIPTIONS)
+    assert {desc.field for desc in RAW_SENSOR_DESCRIPTIONS if desc.entity_registry_enabled_default} == PERIODIC_FIELDS
     for entity in entities:
         assert not hasattr(entity, "async_turn_on")
         assert not hasattr(entity, "async_set_native_value")

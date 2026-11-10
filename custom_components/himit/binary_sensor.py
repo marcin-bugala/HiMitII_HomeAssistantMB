@@ -4,7 +4,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from homeassistant.components.binary_sensor import (
-    BinarySensorDeviceClass,
     BinarySensorEntity,
     BinarySensorEntityDescription,
 )
@@ -31,7 +30,6 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[HimitBinarySensorDescription, ...] = (
         key="a2w_running",
         translation_key="a2w_running",
         field="A2W_SW_ON",
-        device_class=BinarySensorDeviceClass.RUNNING,
         icon="mdi:heat-pump",
     ),
 )
@@ -44,7 +42,7 @@ EXPERIMENTAL_BINARY_SENSOR_DESCRIPTIONS = tuple(
         field=field,
         experimental=True,
         entity_category=EntityCategory.DIAGNOSTIC,
-        entity_registry_enabled_default=True,
+        entity_registry_enabled_default=False,
         icon="mdi:flask-outline",
     )
     for key, name, field in (
@@ -107,10 +105,15 @@ class HimitBinarySensor(HimitEntity, BinarySensorEntity):
     @property
     def extra_state_attributes(self) -> dict | None:
         if not self.entity_description.experimental:
-            return None
+            return {
+                "source_field": self.entity_description.field,
+                "data_role": "unit_enabled",
+                "compressor_running_verified": False,
+            }
         return {
             "source_field": self.entity_description.field,
             "mapping_confidence": "experimental",
+            "suitable_for_realtime_control": False,
         }
 
     @property

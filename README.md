@@ -15,13 +15,19 @@ new entities follow the Home Assistant language. User-assigned names are retaine
 
 ## Features
 
-### Read-only telemetry extension (1.2.0)
+### Read-only telemetry extension (1.3.0)
 
-Adds 30 diagnostic entities using the existing coordinator snapshot, with no
-additional API requests or new control actions. All **30 new diagnostic entities**
-are enabled by default for recording and comparison. Updating this fork also enables
-these additions if they were disabled by the integration's previous defaults.
-Entities explicitly disabled by the user remain disabled.
+Adds 30 read-only telemetry entities using the existing coordinator snapshot, with no
+additional API requests or new control actions. The four periodic candidates
+`Power_heating`, `Capacity_heating`, `Power_DHW` and `Capacity_DHW` are enabled
+by default as ordinary sensors. The remaining 26 additions stay available as
+diagnostics, disabled by default on new installations.
+
+Updating preserves enabled existing entities and their history. Only the four
+periodic candidates are enabled if disabled by earlier integration defaults;
+explicit user disables are respected. The update does not turn existing entities
+off. Eight unverified room readings are also diagnostic and disabled by default
+for new installations, with their existing values and identifiers preserved.
 
 - 14 experimental binary flags: space heating/DHW defrost, four frost protection
   flags, ECO, night, quiet, electric heating, disinfection, Anti Legionella,
@@ -30,7 +36,10 @@ Entities explicitly disabled by the user remain disabled.
   (`Twi`, `Two`, `Twohp`, `Pw`, `PWM`, `Fd`, `Q_p`, `Power_heating`,
   `Capacity_heating`, `Power_DHW`, `Capacity_DHW`, `EH1_Power`, `EH2_Power`).
 
-Each addition exposes `source_field` and `mapping_confidence`. Enabled status does
+Each addition exposes `source_field` and `mapping_confidence`. Raw sensors also
+expose `data_role` (`periodic_unverified` or `auxiliary_unverified`) and
+`suitable_for_realtime_control: false`. The four periodic candidates expose
+`unit_scale_verified: false` and `period_verified: false`. Enabled status does
 not change the experimental confidence of the mappings. Field presence
 was confirmed in a device snapshot, but event semantics, scaling and units have
 not been verified. Experimental flags interpret only explicit 0/1 or true/false;
@@ -40,8 +49,10 @@ be a placeholder. No COP, compressor-running inference or combined defrost signa
 is calculated. Do not use experimental cloud flags as the sole protection signal.
 
 Existing entity keys, unique IDs and controls are preserved. In particular,
-**Heat Pump Running** still reads `A2W_SW_ON` for compatibility; this indicates
-the main enable flag and does **not** establish that the compressor is running.
+the legacy `a2w_running` key still reads `A2W_SW_ON` for compatibility, but its
+display name is now **Heat pump enabled** and the misleading RUNNING device
+class is removed. It indicates the main enable flag and does **not** establish
+that the compressor is running. Its attributes explicitly identify this role.
 Existing switches and number entities remain writable as before.
 
 Diagnostics now redact additional nested identifiers and replace device-state
@@ -65,13 +76,13 @@ diagnostics. HACS metadata and documentation URLs point to this fork.
 
 | Platform | Entity | Description |
 |---|---|---|
-| `binary_sensor` | Heat Pump Running | Reports whether the compressor / A2W unit is active |
+| `binary_sensor` | Heat pump enabled | Main A2W enable flag; does not report compressor operation |
 | `sensor` | Circuit 1 Water Temp | Live actual water temperature — Circuit 1 (fixedDid18) |
 | `sensor` | Circuit 2 Water Temp | Live actual water temperature — Circuit 2 (fixedDid19) |
 | `sensor` | DHW Water Temp | Live actual domestic hot water temperature (fixedDid16) |
 | `sensor` | Pool Water Temp | Live actual swimming pool temperature (fixedDid17) |
 | `sensor` | Outdoor Ambient Temp | External sensor reading (swj_Ta) |
-| `sensor` | Room 1–8 Temp | Individual room sensor readings (TsR1–TsR8) |
+| `sensor` | Room 1–8 Temp (unverified) | TsR1–TsR8; observed fixed 22°C, diagnostic and disabled by default for new installs |
 | `switch` | Circuit 1 (Heating) | Enable / disable Circuit 1 |
 | `switch` | Circuit 2 (Heating) | Enable / disable Circuit 2 |
 | `switch` | Domestic Hot Water | Enable / disable DHW heating |
