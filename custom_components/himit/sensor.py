@@ -19,7 +19,7 @@ from homeassistant.helpers.entity import EntityCategory
 from .const import DOMAIN
 from .coordinator import HimitCoordinator
 from .entity import HimitEntity
-from .telemetry import raw_value
+from .telemetry import PERIODIC_FIELDS, raw_value
 
 
 @dataclass(frozen=True)
@@ -117,6 +117,8 @@ SENSOR_DESCRIPTIONS: tuple[HimitSensorDescription, ...] = (
             state_class=SensorStateClass.MEASUREMENT,
             native_unit_of_measurement=UnitOfTemperature.CELSIUS,
             icon="mdi:home-thermometer",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            entity_registry_enabled_default=False,
         )
         for i in range(1, 9)
     ),
@@ -130,9 +132,9 @@ RAW_SENSOR_DESCRIPTIONS = tuple(
         translation_key=key,
         field=field,
         raw=True,
-        entity_category=EntityCategory.DIAGNOSTIC,
-        entity_registry_enabled_default=True,
-        icon="mdi:code-braces",
+        entity_category=None if field in PERIODIC_FIELDS else EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=field in PERIODIC_FIELDS,
+        icon="mdi:chart-timeline-variant" if field in PERIODIC_FIELDS else "mdi:code-braces",
     )
     for key, name, field in (
         ("alarm_code_raw", "Alarm code (raw)", "alarmCode"),
@@ -188,12 +190,24 @@ class HimitSensor(HimitEntity, SensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict | None:
-        if not self.entity_description.raw:
+        description = self.entity_description
+        if description.key.startswith("room_temp_r"):
+            return {
+                "source_field": description.field,
+                "mapping_confidence": "unverified_room_reading",
+                "measurement_verified": False,
+            }
+        if not description.raw:
             return None
-        return {
-            "source_field": self.entity_description.field,
+        attributes = {
+            "source_field": description.field,
             "mapping_confidence": "raw_unmapped",
+            "data_role": "periodic_unverified" if description.field in PERIODIC_FIELDS else "auxiliary_unverified",
+            "suitable_for_realtime_control": False,
         }
+        if description.field in PERIODIC_FIELDS:
+            attributes.update({"unit_scale_verified": False, "period_verified": False})
+        return attributes
 
     @property
     def available(self) -> bool:

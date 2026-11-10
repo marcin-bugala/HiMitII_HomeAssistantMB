@@ -83,28 +83,28 @@
         "name": "DHW Setpoint"
       },
       "room_temp_r1": {
-        "name": "Room 1 Temp"
+        "name": "Room 1 temperature (unverified)"
       },
       "room_temp_r2": {
-        "name": "Room 2 Temp"
+        "name": "Room 2 temperature (unverified)"
       },
       "room_temp_r3": {
-        "name": "Room 3 Temp"
+        "name": "Room 3 temperature (unverified)"
       },
       "room_temp_r4": {
-        "name": "Room 4 Temp"
+        "name": "Room 4 temperature (unverified)"
       },
       "room_temp_r5": {
-        "name": "Room 5 Temp"
+        "name": "Room 5 temperature (unverified)"
       },
       "room_temp_r6": {
-        "name": "Room 6 Temp"
+        "name": "Room 6 temperature (unverified)"
       },
       "room_temp_r7": {
-        "name": "Room 7 Temp"
+        "name": "Room 7 temperature (unverified)"
       },
       "room_temp_r8": {
-        "name": "Room 8 Temp"
+        "name": "Room 8 temperature (unverified)"
       },
       "alarm_code_raw": {
         "name": "Alarm code (raw)"
@@ -137,16 +137,16 @@
         "name": "Q_p (raw experimental)"
       },
       "telemetry_power_heating_raw": {
-        "name": "Power_heating (raw experimental)"
+        "name": "Heating · Power_heating (periodic, unverified)"
       },
       "telemetry_capacity_heating_raw": {
-        "name": "Capacity_heating (raw experimental)"
+        "name": "Heating · Capacity_heating (periodic, unverified)"
       },
       "telemetry_power_dhw_raw": {
-        "name": "Power_DHW (raw experimental)"
+        "name": "DHW · Power_DHW (periodic, unverified)"
       },
       "telemetry_capacity_dhw_raw": {
-        "name": "Capacity_DHW (raw experimental)"
+        "name": "DHW · Capacity_DHW (periodic, unverified)"
       },
       "telemetry_eh1_power_raw": {
         "name": "EH1_Power (raw experimental)"
@@ -157,7 +157,7 @@
     },
     "binary_sensor": {
       "a2w_running": {
-        "name": "Heat Pump Running"
+        "name": "Heat pump enabled"
       },
       "defrost_spaceheat": {
         "name": "Space heating defrost (experimental)"

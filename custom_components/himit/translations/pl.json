@@ -83,28 +83,28 @@
         "name": "CWU – temperatura zadana"
       },
       "room_temp_r1": {
-        "name": "Pomieszczenie 1 – temperatura"
+        "name": "Pomieszczenie 1 — temperatura (niezweryfikowana)"
       },
       "room_temp_r2": {
-        "name": "Pomieszczenie 2 – temperatura"
+        "name": "Pomieszczenie 2 — temperatura (niezweryfikowana)"
       },
       "room_temp_r3": {
-        "name": "Pomieszczenie 3 – temperatura"
+        "name": "Pomieszczenie 3 — temperatura (niezweryfikowana)"
       },
       "room_temp_r4": {
-        "name": "Pomieszczenie 4 – temperatura"
+        "name": "Pomieszczenie 4 — temperatura (niezweryfikowana)"
       },
       "room_temp_r5": {
-        "name": "Pomieszczenie 5 – temperatura"
+        "name": "Pomieszczenie 5 — temperatura (niezweryfikowana)"
       },
       "room_temp_r6": {
-        "name": "Pomieszczenie 6 – temperatura"
+        "name": "Pomieszczenie 6 — temperatura (niezweryfikowana)"
       },
       "room_temp_r7": {
-        "name": "Pomieszczenie 7 – temperatura"
+        "name": "Pomieszczenie 7 — temperatura (niezweryfikowana)"
       },
       "room_temp_r8": {
-        "name": "Pomieszczenie 8 – temperatura"
+        "name": "Pomieszczenie 8 — temperatura (niezweryfikowana)"
       },
       "alarm_code_raw": {
         "name": "Kod alarmu (surowy)"
@@ -137,16 +137,16 @@
         "name": "Q_p (surowy, eksperymentalny)"
       },
       "telemetry_power_heating_raw": {
-        "name": "Power_heating (surowy, eksperymentalny)"
+        "name": "CO · Power_heating (dane okresowe, eksperymentalne)"
       },
       "telemetry_capacity_heating_raw": {
-        "name": "Capacity_heating (surowy, eksperymentalny)"
+        "name": "CO · Capacity_heating (dane okresowe, eksperymentalne)"
       },
       "telemetry_power_dhw_raw": {
-        "name": "Power_DHW (surowy, eksperymentalny)"
+        "name": "CWU · Power_DHW (dane okresowe, eksperymentalne)"
       },
       "telemetry_capacity_dhw_raw": {
-        "name": "Capacity_DHW (surowy, eksperymentalny)"
+        "name": "CWU · Capacity_DHW (dane okresowe, eksperymentalne)"
       },
       "telemetry_eh1_power_raw": {
         "name": "EH1_Power (surowy, eksperymentalny)"
@@ -157,7 +157,7 @@
     },
     "binary_sensor": {
       "a2w_running": {
-        "name": "Pompa ciepła pracuje"
+        "name": "Pompa ciepła włączona"
       },
       "defrost_spaceheat": {
         "name": "Odszranianie CO (eksperymentalne)"

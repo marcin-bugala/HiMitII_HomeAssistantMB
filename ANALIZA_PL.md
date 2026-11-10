@@ -1,7 +1,7 @@
 # Hi-Mit II MB — zakres rozszerzenia
 
 Baza: `marcin-bugala/HiMitII_HomeAssistantMB`, commit
-`dbe2f6e6fbd8e9833d7fca7b5f5cfecfc905389e`. Wersja lokalnego rozszerzenia: 1.2.1.
+`dbe2f6e6fbd8e9833d7fca7b5f5cfecfc905389e`. Aktualna wersja rozszerzenia: 1.3.0.
 Przeanalizowano oryginalny plik diagnostyczny przekazany w poprzednim czacie.
 W testach pozostawiono wyłącznie anonimową telemetrię; nie ma danych konta,
 identyfikatorów urządzenia ani czasu zrzutu.
@@ -31,9 +31,12 @@ informacji o rzeczywistej pracy sprężarki.
 
 ## Nowe encje
 
-Wszystkie mają kategorię diagnostyczną i są domyślnie włączone do obserwacji.
-Aktualizacja włącza również nowe encje wyłączone przez poprzednie ustawienia
-integracji; ręczne wyłączenia użytkownika są zachowane. Status eksperymentalny
+Domyślnie włączone jako zwykłe sensory są cztery pola okresowe:
+`Power_heating`, `Capacity_heating`, `Power_DHW`, `Capacity_DHW`. Pozostałe 26
+encji jest diagnostycznych i domyślnie wyłączonych w nowych instalacjach. Aktualizacja
+zachowuje wszystkie już włączone encje i ręczne wyłączenia użytkownika; nie
+przerywa istniejącej rejestracji. Automatycznie włącza tylko cztery sensory,
+jeśli wyłączyły je starsze ustawienia domyślne integracji. Status eksperymentalny
 mapowań pozostaje bez zmian. Każda dodana encja wskazuje pole źródłowe i poziom pewności w atrybutach
 `source_field` oraz `mapping_confidence`.
 
@@ -74,8 +77,9 @@ zgodnie z PR #1; istniejące identyfikatory z rejestru HA pozostają zachowane.
 Nowo tworzone identyfikatory mogą zależeć od języka HA.
 
 Encja `a2w_running` nadal czyta `A2W_SW_ON`, aby nie zmieniać automatyzacji.
-Jej dotychczasowa nazwa sugeruje pracę, ale pole oznacza włączenie główne i nie
-potwierdza pracy sprężarki. Nie używać go jako dowodu pracy sprężarki.
+Jej nazwa to teraz „Pompa ciepła włączona”, bez klasy urządzenia RUNNING.
+Pole oznacza włączenie główne i nie potwierdza pracy sprężarki. Atrybut
+`compressor_running_verified: false` wskazuje to ograniczenie.
 
 Nie dodano endpointów, dodatkowego odpytywania ani nowych operacji sterowania.
 Nie logowano się do chmury użytkownika i nie wysyłano komend do pompy.
@@ -103,7 +107,8 @@ Windows. Nie jest to test uruchomienia pełnego HA OS ani test na wersji
 1. Wykonać kopię aktualnego katalogu `custom_components/himit`.
 2. Zastąpić go katalogiem z przygotowanej paczki i uruchomić ponownie HA.
    Nie usuwać konfiguracji integracji ani jej encji.
-3. Sprawdzić dostępność 30 nowych encji diagnostycznych po aktualizacji.
+3. Sprawdzić dostępność czterech sensorów okresowych. Pozostałe odczyty można
+   włączyć w rejestrze encji do dalszej walidacji. Już włączone pozostają aktywne.
 4. Porównać obserwacje z kontrolerem i aplikacją podczas naturalnego postoju,
    CO, CWU oraz odszraniania. Zapisać czas, stan na kontrolerze i zrzut diagnostyki.
 5. Do potwierdzenia mapowania wymagać zgodności przed, podczas i po zdarzeniu,
@@ -117,3 +122,43 @@ nie powinny być jedynym zabezpieczeniem odpływu skroplin.
 Endpointy `get_atw_vales` i `get_hmt_attr_info` pozostają kolejnym etapem:
 przed implementacją potrzebne są ich zanonimizowane odpowiedzi oraz potwierdzenie
 formatu. Aktualne dane wystarczają do tej wersji bez rozszerzania komunikacji.
+
+## Weryfikacja historii 6–10 listopada 2026
+
+Na obserwowanej instalacji przeanalizowano około 95 godzin historii wszystkich
+30 dodatków, od 6 listopada około 19:12 do 10 listopada około 17:53 czasu Polski.
+Zmienne były cztery pola:
+
+| Pole | Zakres | Liczba zmian po początku wspólnego okna |
+|---|---|---|
+| `Power_heating` | 0–6 | 24 |
+| `Capacity_heating` | 0–22 | 49 |
+| `Power_DHW` | 0–9 | 31 |
+| `Capacity_DHW` | 0–20 | 32 |
+
+Suma pól Power porównana z 576 pięciominutowymi średnimi licznika w oknie
+8 listopada 17:50 — 10 listopada 17:50 miała korelację około 0,31 bez
+przesunięcia oraz około 0,84 przy opóźnieniu danych chmurowych o 30 minut.
+To opis tej próby, nie walidacja protokołu dla wszystkich modeli. Sugeruje dane
+za miniony okres. Nie dowodzi dokładnej długości okresu, jednostki ani skali.
+
+Przykład: 10 listopada o 15:39 `Power_heating=2` i `Power_DHW=7`, a całka
+pięciominutowej mocy licznika za poprzednie 30 minut wynosiła około 0,96 kWh.
+Hipoteza 0,1 kWh na jednostkę jest interesująca, lecz rozbieżności innych
+przedziałów nie pozwalają wdrożyć tego przelicznika. **W kodzie nie ma
+konwersji do kW/kWh, przesuwania znaczników czasu, sumowania energii ani COP.**
+
+Wszystkie 14 flag pozostało `off`, a 12 pozostałych surowych pól pozostało
+zerowych. Brak aktywacji alarmu czy grzałki może być prawidłowy; nie oznaczamy
+tych pól jako nieobsługiwane. Defrost nie uzyskał niezależnego potwierdzenia.
+
+Osiem odczytów `TsR1`–`TsR8` pozostawało 22°C. Są teraz opisane jako
+niezweryfikowane i domyślnie wyłączone diagnostycznie dla nowych instalacji.
+Istniejące wartości, jednostki, klasy statystyk i identyfikatory zachowano.
+
+Surowe sensory mają `data_role`: `periodic_unverified` dla czterech kandydatów
+i `auxiliary_unverified` dla pozostałych. `source_field` i `mapping_confidence`
+pozostają kompatybilne. Nowe pola mają `suitable_for_realtime_control: false`;
+cztery sensory okresowe również `unit_scale_verified: false` i
+`period_verified: false`. Oznacza to brak walidacji, nie automatyczną blokadę
+użycia encji przez automatyzacje HA.

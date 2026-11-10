@@ -31,7 +31,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    _async_enable_new_diagnostics(hass, entry)
+    _async_enable_periodic_sensors(hass, entry)
 
     # Listen for option updates
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
@@ -40,14 +40,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 @callback
-def _async_enable_new_diagnostics(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Enable additions previously disabled by this integration's old defaults."""
-    from .binary_sensor import EXPERIMENTAL_BINARY_SENSOR_DESCRIPTIONS
+def _async_enable_periodic_sensors(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Enable only the four periodic candidates disabled by earlier defaults.
+
+    Do not disable existing entities or override explicit user disables.
+    """
     from .sensor import RAW_SENSOR_DESCRIPTIONS
 
-    keys = {description.key for description in (
-        *EXPERIMENTAL_BINARY_SENSOR_DESCRIPTIONS, *RAW_SENSOR_DESCRIPTIONS
-    )}
+    keys = {description.key for description in RAW_SENSOR_DESCRIPTIONS
+            if description.entity_registry_enabled_default}
     registry = er.async_get(hass)
     for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
         if (
